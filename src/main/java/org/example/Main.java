@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.Operacional.Menu;
 import org.example.Modelo.Registro;
+import org.example.Operacional.MenuPrincipal;
 //import org.glassfish.grizzly.http.server.HttpServer;
 //import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 //import org.glassfish.jersey.server.ResourceConfig;
@@ -50,11 +51,9 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Menu menu = new Menu();
-
-        List<Registro> registro = new ArrayList<>();
-
-        menu.mostrarMenu(scanner);
+        MenuPrincipal menuPrincipal = new MenuPrincipal();
+        menuPrincipal.menuPrincipal(scanner);
+        scanner.close();
 
     }
 

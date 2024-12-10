@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
 
 
 public class RegistroRepositorio implements RepositorioBase<Registro>  {
@@ -37,33 +37,47 @@ public class RegistroRepositorio implements RepositorioBase<Registro>  {
 
 
     @Override
-    public void UpDate(Registro registro) {
+    public void UpDateDinamico(int mae_brinco, Map<String, Object> fieldsToUpdate) {
 
-        try{
+        if (fieldsToUpdate == null || fieldsToUpdate.isEmpty()) {
+            System.out.println("Nenhum campo para atualizar.");
+            return;
+        }
+
+        // Construção da query dinâmica
+        StringBuilder query = new StringBuilder("UPDATE T_Registro SET ");
+        fieldsToUpdate.forEach((key, value) -> query.append(key).append("=?, "));
+        query.delete(query.length() - 2, query.length()); // Remove a última vírgula
+        query.append(" WHERE mae_brinco=?");
+
+        try {
             Connection conn = ConexaoBancoDados.getConnection();
-            String query = "UPDATE T_Registro SET id_cordeiro=?, data_nascimento=?, sexo=?, peso_nascimento=?, " +
-                    "raca=? WHERE mae_brinco=?";
-            PreparedStatement stmt = conn.prepareStatement(query);
+            PreparedStatement stmt = conn.prepareStatement(query.toString());
 
-            stmt.setInt(1,registro.getId_cordeiro());
-            stmt.setInt(2, registro.getMae_brinco());
-            stmt.setDate(3, new java.sql.Date (registro.getData_nascimento().getTime()));
-            stmt.setString(4, registro.getSexo());
-            stmt.setDouble(5, registro.getPeso_nascimento());
-            stmt.setString(6, registro.getRaca());
-            stmt.executeUpdate();
+            int index = 1;
 
-        } catch (SQLException e){
+            // Adiciona os valores dos campos a atualizar
+            for (Object value : fieldsToUpdate.values()) {
+                stmt.setObject(index++, value); // Define os valores dinamicamente
+            }
+
+            // Adiciona o identificador (n_brinco)
+            stmt.setInt(index, mae_brinco);
+
+            // Executa a query
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Registro atualizado com sucesso!");
+            } else {
+                System.out.println("Nenhum registro encontrado para atualizar.");
+            }
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    public List<Registro> GetByBrinco(int n_brinco) {
-        return List.of();
-    }
-
-    @Override
     public List<Registro> GetByMaeBrinco(int mae_brinco) {
         List<Registro> registro = new ArrayList<>();
 
@@ -100,7 +114,7 @@ public class RegistroRepositorio implements RepositorioBase<Registro>  {
 
 
     @Override
-    public void Delete(int n_brinco) {
+    public void removerPorBrinco(int n_brinco) {
         try{
             Connection conn = ConexaoBancoDados.getConnection();
             String query = "DELTE FROM T_Registro WHERE n_brinco=? ";
@@ -117,4 +131,30 @@ public class RegistroRepositorio implements RepositorioBase<Registro>  {
         }
     }
 
+    public List<Registro> GetByBrincoV(int n_brinco) {return List.of();}
+    public List<Registro> GetByBrincoP(int n_brinco) {return List.of();}
+    public List<Registro> GetByBrincoM(int n_brinco) {return List.of();}
+
+
 }
+
+
+//método de update individual
+//
+//        try{
+//Connection conn = ConexaoBancoDados.getConnection();
+//String query = "UPDATE T_Registro SET id_cordeiro=?, data_nascimento=?, sexo=?, peso_nascimento=?, " +
+//        "raca=? WHERE mae_brinco=?";
+//PreparedStatement stmt = conn.prepareStatement(query);
+//
+//            stmt.setInt(1,registro.getId_cordeiro());
+//        stmt.setInt(2, registro.getMae_brinco());
+//        stmt.setDate(3, new java.sql.Date (registro.getData_nascimento().getTime()));
+//        stmt.setString(4, registro.getSexo());
+//        stmt.setDouble(5, registro.getPeso_nascimento());
+//        stmt.setString(6, registro.getRaca());
+//        stmt.executeUpdate();
+//
+//        } catch (SQLException e){
+//        e.printStackTrace();
+//        }
